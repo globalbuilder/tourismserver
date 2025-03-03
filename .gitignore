@@ -1,0 +1,59 @@
+# ----------------------------------------
+#  Python
+# ----------------------------------------
+*.py[cod]
+__pycache__/
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# ----------------------------------------
+#  Environments (venv, .env)
+# ----------------------------------------
+# If your virtual environment folder is named "venv", ignore it:
+venv/
+.venv/
+env/
+ENV/
+
+# For environment variable files (often used with django-environ)
+.env
+.env.*
+
+# ----------------------------------------
+#  Django
+# ----------------------------------------
+db.sqlite3
+*.log
+# If you use local DB files or logs, skip them
+*.sqlite3
+.DS_Store
+
+# Static & media (if you generate them locally)
+staticfiles/
+media/
+# Or if using collectstatic in a different folder:
+static/
+
+# ----------------------------------------
+#  IDE / Editor
+# ----------------------------------------
+# VSCode
+.vscode/
+
+# PyCharm
+.idea/
+
+# Sublime
+*.sublime-project
+*.sublime-workspace
+
+# ----------------------------------------
+#  Coverage / Testing
+# ----------------------------------------
+htmlcov/
+.coverage
+coverage.xml
+
