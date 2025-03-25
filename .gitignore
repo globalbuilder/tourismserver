@@ -9,6 +9,9 @@ __pycache__/
 dist/
 build/
 
+# Ignore the entire Django settings file
+tourism_backend/settings.py
+
 # ----------------------------------------
 #  Environments (venv, .env)
 # ----------------------------------------
