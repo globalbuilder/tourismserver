@@ -13,7 +13,7 @@ class CustomUserAdmin(UserAdmin):
     We add 'is_verified' and 'created_at', plus ordering & filtering.
     """
     list_display = (
-        'id', 'username', 'email', 'is_verified',
+        'id', 'username', 'email','first_name', 'last_name', 'is_verified',
         'is_staff', 'is_superuser', 'is_active', 'created_at'
     )
     list_filter = ('is_staff', 'is_superuser', 'is_active', 'is_verified')
