@@ -5,10 +5,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-
-    # JWT Auth endpoints (from SimpleJWT)
-    path('api/auth/', include('accounts.auth_urls')), 
-
+    
     # Our apps
     path('api/accounts/', include('accounts.urls')),
     path('api/attractions/', include('attractions.urls')),

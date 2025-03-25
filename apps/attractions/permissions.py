@@ -1,18 +1,12 @@
 # apps/attractions/permissions.py
-
 from rest_framework import permissions
 
-class IsFeedbackOwnerOrSuperuser(permissions.BasePermission):
+class IsOwnerOrReadOnly(permissions.BasePermission):
     """
-    Grants access if the request user is either the owner of the Feedback
-    or a superuser.
+    For Feedback/Favorite: user can read any, but only the owner can update/delete.
     """
-
     def has_object_permission(self, request, view, obj):
+        # Safe methods = GET, HEAD, OPTIONS
         if request.method in permissions.SAFE_METHODS:
             return True
-        # Allow if user is superuser
-        if request.user.is_superuser:
-            return True
-        # Otherwise, only the feedback's owner can modify
         return obj.user == request.user

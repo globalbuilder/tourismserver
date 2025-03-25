@@ -1,56 +1,87 @@
-# apps/accounts/views.py
+# accounts/views.py
 
-from rest_framework import viewsets, permissions, status
+from rest_framework import generics, status, permissions
 from rest_framework.response import Response
-from django.contrib.auth import get_user_model
+from rest_framework.views import APIView
+from .serializers import (
+    RegisterSerializer, UserSerializer, ProfileSerializer,
+    ChangePasswordSerializer
+)
 from .models import Profile
-from .serializers import UserSerializer, ProfileSerializer
-from .permissions import IsProfileOwnerOrSuperuser
+from django.contrib.auth import get_user_model
+from rest_framework_simplejwt.tokens import RefreshToken
 
 User = get_user_model()
 
-class UserViewSet(viewsets.ModelViewSet):
+class RegisterView(generics.CreateAPIView):
     """
-    CRUD for User. Only authenticated users can view their own detail.
-    Superuser can view everyone's. 
+    POST /api/accounts/register/
+    Body: { first_name, last_name, username, password1, password2, image(optional) }
+    Creates User + Profile. Returns 201 with user data.
     """
-    queryset = User.objects.all().order_by('-created_at')
+    serializer_class = RegisterSerializer
+    permission_classes = [permissions.AllowAny]
+
+
+class UserDetailUpdateView(generics.RetrieveUpdateAPIView):
+    """
+    GET/PUT/PATCH /api/accounts/user/
+    The current user can edit first_name, last_name, email, etc.
+    (cannot change password here).
+    """
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    def list(self, request, *args, **kwargs):
-        """
-        If the user is superuser, return all users.
-        Otherwise, return only their own user object.
-        """
-        if request.user.is_superuser:
-            return super().list(request, *args, **kwargs)
-        self.queryset = User.objects.filter(id=request.user.id)
-        return super().list(request, *args, **kwargs)
+    def get_object(self):
+        return self.request.user
 
 
-class ProfileViewSet(viewsets.ModelViewSet):
+class ProfileDetailUpdateView(generics.RetrieveUpdateAPIView):
     """
-    Each user has one Profile. Access restricted by IsProfileOwnerOrSuperuser.
+    GET/PUT/PATCH /api/accounts/profile/
+    The current user's profile, including phone_number, image, etc.
     """
-    queryset = Profile.objects.select_related('user').all()
     serializer_class = ProfileSerializer
-    permission_classes = [permissions.IsAuthenticated, IsProfileOwnerOrSuperuser]
+    permission_classes = [permissions.IsAuthenticated]
 
-    def get_queryset(self):
-        """
-        Superuser sees all, normal user sees only their own profile.
-        """
-        if self.request.user.is_superuser:
-            return Profile.objects.select_related('user').all()
-        return Profile.objects.filter(user=self.request.user)
+    def get_object(self):
+        return Profile.objects.get(user=self.request.user)
 
-    def perform_create(self, serializer):
-        """
-        A user can create their own profile only if they don't have one.
-        """
-        user = self.request.user
-        if Profile.objects.filter(user=user).exists():
-            return Response({"detail": "Profile already exists."},
-                            status=status.HTTP_400_BAD_REQUEST)
-        serializer.save(user=user)
+
+class ChangePasswordView(generics.UpdateAPIView):
+    """
+    POST or PATCH to /api/accounts/change-password/
+    Body: { old_password, new_password1, new_password2 }
+    """
+    serializer_class = ChangePasswordSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
+
+    def update(self, request, *args, **kwargs):
+        user = self.get_object()
+        serializer = self.get_serializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+
+        user.set_password(serializer.validated_data['new_password1'])
+        user.save()
+        return Response({"detail": "Password updated successfully."}, status=status.HTTP_200_OK)
+
+
+class LogoutView(APIView):
+    """
+    POST /api/accounts/logout/
+    Body: { "refresh": "<refresh_token>" }
+    Blacklist the refresh token if using SimpleJWT token blacklisting.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        try:
+            refresh_token = request.data["refresh"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response({"detail": "Logged out."}, status=status.HTTP_205_RESET_CONTENT)
+        except Exception:
+            return Response(status=status.HTTP_400_BAD_REQUEST)

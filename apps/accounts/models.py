@@ -1,4 +1,4 @@
-# apps/accounts/models.py
+# accounts/models.py
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
@@ -6,35 +6,26 @@ from django.utils import timezone
 
 class User(AbstractUser):
     """
-    A custom user model extending Django's AbstractUser.
-    
-    Fields inherited from AbstractUser:
-      - username, password, email, first_name, last_name, is_staff,
-        is_superuser, is_active, date_joined, etc.
-
-    Additional fields below:
-      - phone_number
-      - is_verified
-      - created_at
+    Custom User model:
+      - Inherits from AbstractUser (username, email, password, etc.)
+      - Adds is_verified, created_at
+      - phone_number removed (moved to Profile)
     """
-
-    phone_number = models.CharField(max_length=20, blank=True, null=True)
-    is_verified = models.BooleanField(default=False)  # For e.g. verifying email or phone
+    is_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now, editable=False)
 
     def __str__(self):
-        # Return email if present, otherwise fallback to username
         return self.email if self.email else self.username
 
 
 class Profile(models.Model):
     """
-    Profile holds additional personal data for each user.
-    One-to-one with the custom User model.
+    Profile: one-to-one with the custom User model.
+    Now includes phone_number for contact info.
     """
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-    
-    # Optional demographic data
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
+
     date_of_birth = models.DateField(blank=True, null=True)
     image = models.ImageField(upload_to='profiles/', blank=True, null=True)
     address = models.TextField(blank=True, null=True)

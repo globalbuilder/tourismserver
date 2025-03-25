@@ -8,35 +8,47 @@ from .models import Category, Attraction, Feedback, Favorite
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'image_preview', 'created_at', 'updated_at')
     search_fields = ('name',)
-    readonly_fields = ('created_at', 'updated_at')
+    ordering = ('id',)
 
     def image_preview(self, obj):
         if obj.image:
-            return format_html('<img src="{}" width="50" height="50" style="object-fit:cover;"/>', obj.image.url)
+            return format_html(
+                '<img src="{}" style="width:50px; height:50px; object-fit:cover;" />',
+                obj.image.url
+            )
         return "No Image"
-    image_preview.short_description = "Image Preview"
+    image_preview.short_description = "Category Image"
+
 
 @admin.register(Attraction)
 class AttractionAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'category', 'average_rating', 'image_preview', 'price', 'created_at', 'updated_at')
-    list_filter = ('category',)
+    list_display = (
+        'id', 'name', 'category', 'average_rating',
+        'image_preview', 'created_at', 'updated_at'
+    )
     search_fields = ('name', 'address')
-    readonly_fields = ('created_at', 'updated_at', 'average_rating')
+    list_filter = ('category',)
+    ordering = ('id',)
 
     def image_preview(self, obj):
         if obj.image:
-            return format_html('<img src="{}" width="50" height="50" style="object-fit:cover;"/>', obj.image.url)
+            return format_html(
+                '<img src="{}" style="width:50px; height:50px; object-fit:cover;" />',
+                obj.image.url
+            )
         return "No Image"
-    image_preview.short_description = "Image Preview"
+    image_preview.short_description = "Attraction Image"
+
 
 @admin.register(Feedback)
 class FeedbackAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'attraction', 'rating', 'created_at')
-    list_filter = ('rating', 'created_at')
-    search_fields = ('user__username', 'attraction__name')
+    search_fields = ('user__username', 'attraction__name', 'comment')
+    ordering = ('-created_at',)
+
 
 @admin.register(Favorite)
 class FavoriteAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'attraction', 'created_at')
-    list_filter = ('created_at',)
     search_fields = ('user__username', 'attraction__name')
+    ordering = ('-created_at',)

@@ -1,15 +1,16 @@
 # apps/notifications/views.py
 
-from rest_framework import viewsets, permissions, status
+from rest_framework import viewsets, permissions
 from rest_framework.response import Response
+from django.db.models import Q
 from .models import Notification
 from .serializers import NotificationSerializer
-from django.db.models import Q
 
-class NotificationViewSet(viewsets.ModelViewSet):
+class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    Provides CRUD for Notification model.
-    By default, only authenticated users can access.
+    Provides read-only access to notifications.
+    Normal users see only notifications addressed to them or broadcast.
+    When a user retrieves a single notification, it is automatically marked as read.
     """
     queryset = Notification.objects.all().order_by('-created_at')
     serializer_class = NotificationSerializer
@@ -22,18 +23,11 @@ class NotificationViewSet(viewsets.ModelViewSet):
             Q(user=self.request.user) | Q(user__isnull=True)
         ).order_by('-created_at')
 
-    def perform_create(self, serializer):
-        # Restrict creation to superusers only
-        if not self.request.user.is_superuser:
-            return Response(
-                {"detail": "Only superusers can create notifications."},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        serializer.save(created_by=self.request.user)
-
-    def partial_update(self, request, *args, **kwargs):
-        """
-        If you want a custom endpoint for 'mark_as_read', you could do:
-        PATCH /api/notifications/<pk>/ { "is_read": true }
-        """
-        return super().partial_update(request, *args, **kwargs)
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        # Automatically mark as read if not already
+        if not instance.is_read:
+            instance.is_read = True
+            instance.save(update_fields=['is_read'])
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
