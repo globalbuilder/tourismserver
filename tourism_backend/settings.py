@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     # Third-party
     'rest_framework',
     'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',  # if you want the Logout to blacklist
     'django_filters',
 
     # Your apps
