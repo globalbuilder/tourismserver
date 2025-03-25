@@ -1,5 +1,3 @@
-# accounts/models.py
-
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
@@ -7,23 +5,23 @@ from django.utils import timezone
 class User(AbstractUser):
     """
     Custom User model:
-      - Inherits from AbstractUser (username, email, password, etc.)
-      - Adds is_verified, created_at
-      - phone_number removed (moved to Profile)
+      - Inherits from AbstractUser (username, password, etc.)
+      - Email is no longer stored here (moved to Profile)
+      - Adds is_verified and created_at
     """
     is_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now, editable=False)
 
     def __str__(self):
-        return self.email if self.email else self.username
-
+        return self.username  # email not available here
 
 class Profile(models.Model):
     """
     Profile: one-to-one with the custom User model.
-    Now includes phone_number for contact info.
+    Now includes email and phone_number for contact info.
     """
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    email = models.EmailField(unique=True, blank=True, null=True)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
 
     date_of_birth = models.DateField(blank=True, null=True)

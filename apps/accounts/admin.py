@@ -13,11 +13,11 @@ class CustomUserAdmin(UserAdmin):
     We add 'is_verified' and 'created_at', plus ordering & filtering.
     """
     list_display = (
-        'id', 'username', 'email','first_name', 'last_name', 'is_verified',
+        'id', 'username','first_name', 'last_name', 'is_verified',
         'is_staff', 'is_superuser', 'is_active', 'created_at'
     )
     list_filter = ('is_staff', 'is_superuser', 'is_active', 'is_verified')
-    search_fields = ('username', 'email', 'first_name', 'last_name')
+    search_fields = ('username', 'first_name', 'last_name')
     ordering = ('id',)
 
     # Show certain fields in the form; you can customize more if needed
@@ -26,7 +26,7 @@ class CustomUserAdmin(UserAdmin):
             'fields': ('username', 'password')
         }),
         ('Personal Info', {
-            'fields': ('first_name', 'last_name', 'email')
+            'fields': ('first_name', 'last_name')
         }),
         ('Extra Info', {
             'fields': ('is_verified', 'created_at')
@@ -46,8 +46,8 @@ class ProfileAdmin(admin.ModelAdmin):
     """
     Admin for Profile, displaying phone_number, image thumbnail, etc.
     """
-    list_display = ('user', 'phone_number', 'image_preview', 'date_of_birth')
-    search_fields = ('user__username', 'user__email', 'phone_number')
+    list_display = ('user', 'email', 'phone_number', 'image_preview', 'date_of_birth')
+    search_fields = ('user__username', 'email', 'phone_number')
     list_filter = ('date_of_birth',)
     ordering = ('user',)
 

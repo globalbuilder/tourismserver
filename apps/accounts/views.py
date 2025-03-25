@@ -14,21 +14,13 @@ from rest_framework_simplejwt.tokens import RefreshToken
 User = get_user_model()
 
 class RegisterView(generics.CreateAPIView):
-    """
-    POST /api/accounts/register/
-    Body: { first_name, last_name, username, password1, password2, image(optional) }
-    Creates User + Profile. Returns 201 with user data.
-    """
+
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
 
 
 class UserDetailUpdateView(generics.RetrieveUpdateAPIView):
-    """
-    GET/PUT/PATCH /api/accounts/user/
-    The current user can edit first_name, last_name, email, etc.
-    (cannot change password here).
-    """
+
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -37,10 +29,7 @@ class UserDetailUpdateView(generics.RetrieveUpdateAPIView):
 
 
 class ProfileDetailUpdateView(generics.RetrieveUpdateAPIView):
-    """
-    GET/PUT/PATCH /api/accounts/profile/
-    The current user's profile, including phone_number, image, etc.
-    """
+
     serializer_class = ProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -49,10 +38,7 @@ class ProfileDetailUpdateView(generics.RetrieveUpdateAPIView):
 
 
 class ChangePasswordView(generics.UpdateAPIView):
-    """
-    POST or PATCH to /api/accounts/change-password/
-    Body: { old_password, new_password1, new_password2 }
-    """
+
     serializer_class = ChangePasswordSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -70,11 +56,7 @@ class ChangePasswordView(generics.UpdateAPIView):
 
 
 class LogoutView(APIView):
-    """
-    POST /api/accounts/logout/
-    Body: { "refresh": "<refresh_token>" }
-    Blacklist the refresh token if using SimpleJWT token blacklisting.
-    """
+
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
